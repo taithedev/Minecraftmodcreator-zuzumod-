@@ -1,0 +1,71 @@
+name: Windows Setup EXE Release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "desktop/**"
+      - "server/**"
+      - "src/**"
+      - "public/**"
+      - "package.json"
+      - "vite.config.ts"
+      - "index.html"
+      - ".github/workflows/windows-release.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: zuzumod-windows-v0.1.0
+  cancel-in-progress: false
+
+jobs:
+  windows-installer:
+    name: Build and publish setup exe
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Install dependencies
+        run: npm install
+      - name: Run backend tests
+        run: npm test
+      - name: Package Windows setup
+        run: npm run package:win
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+      - name: Validate installer
+        shell: pwsh
+        run: |
+          $installer = "release/ZuzuMod-Studio-Setup-0.1.0.exe"
+          if (!(Test-Path $installer)) { throw "Installer not created: $installer" }
+          $item = Get-Item $installer
+          if ($item.Length -lt 1000000) { throw "Installer is unexpectedly small." }
+          Write-Host "Installer: $($item.FullName) / $($item.Length) bytes"
+      - name: Publish GitHub release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = "v0.1.0"
+          $installer = "release/ZuzuMod-Studio-Setup-0.1.0.exe"
+          $existing = gh release list --json tagName --jq '.[].tagName'
+          if ($LASTEXITCODE -ne 0) { throw "Unable to query releases." }
+          if ($existing -contains $tag) {
+            gh release upload $tag $installer --clobber
+          } else {
+            gh release create $tag $installer --target "$env:GITHUB_SHA" --title "ZuzuMod Studio v0.1.0" --notes "First Windows development release. Includes React studio, Java source editor, no-code basic item/block generator, 16x16 sprite tool, Gradle build/test integration, optional Java 21 installation, Groq AI proposals, and local MCP server. Unsigned experimental installer; full Minecraft integration has not yet been independently verified." --latest
+          }
+          if ($LASTEXITCODE -ne 0) { throw "Failed to publish release." }
+      - name: Upload workflow artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zuzumod-studio-windows-installer
+          path: release/*.exe
+          if-no-files-found: warn
