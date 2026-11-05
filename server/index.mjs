@@ -158,8 +158,8 @@ api.post('/projects/:id/ai', handle(async (req, res) => {
   if (!response.ok) throw new Error('Groq API returned ' + response.status + ': ' + (await response.text()).slice(0, 280));
   const answer = await response.json();
   let raw = answer.choices?.[0]?.message?.content || '';
-  raw = raw.replace(/^\\?&#96;&#96;&#96;(?:json)?/i, '').replace(/&#96;&#96;&#96;$/, '').trim();
-  if (raw.startsWith('&#96;')) raw = raw.slice(1);
+  const fence = String.fromCharCode(96).repeat(3);
+  raw = raw.replace(new RegExp('^' + fence + '(?:json)?\\s*', 'i'), '').replace(new RegExp('\\s*' + fence + '$'), '').trim();
   let proposal;
   try { proposal = JSON.parse(raw); } catch { throw new Error('AI did not return valid JSON. Try a more specific request.'); }
   res.json({ summary: String(proposal.summary || 'Generated proposal'), elements: Array.isArray(proposal.elements) ? proposal.elements.slice(0, 30) : [], files: Array.isArray(proposal.files) ? proposal.files.slice(0, 8) : [] });

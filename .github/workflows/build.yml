@@ -12,4 +12,10 @@ jobs:
         with:
           node-version: '22'
       - run: npm install
+      - name: Check server syntax
+        run: |
+          node --check server/index.mjs
+          node --check server/lib.mjs
+          node --check server/mcp.mjs
+      - run: npm test
       - run: npm run build
