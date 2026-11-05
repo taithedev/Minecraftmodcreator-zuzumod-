@@ -13,3 +13,6 @@ dist/
 .gradle/
 build/
 run/
+
+release/
+desktop/icon.ico

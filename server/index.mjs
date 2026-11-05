@@ -193,4 +193,9 @@ if (fs.existsSync(path.join(root, 'index.html'))) {
   app.get('*', (_, res) => res.sendFile(path.join(root, 'index.html')));
 }
 await ensureWorkspace();
-app.listen(port, '127.0.0.1', () => console.log('ZuzuMod Studio API: http://127.0.0.1:' + port + '\nProjects: ' + workspace));
+export const listener = app.listen(port, '127.0.0.1', () => {
+  const actualPort = listener.address().port;
+  localOrigins.add('http://127.0.0.1:' + actualPort);
+  localOrigins.add('http://localhost:' + actualPort);
+  console.log('ZuzuMod Studio API: http://127.0.0.1:' + actualPort + '\nProjects: ' + workspace);
+});
