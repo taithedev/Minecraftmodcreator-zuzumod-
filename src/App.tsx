@@ -1,8 +1,9 @@
+import type * as React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Editor from '@monaco-editor/react';
 import {
-  AlertCircle, ArrowRight, BookOpen, Box, Boxes, Braces, Check, CheckCircle2, ChevronDown,
-  ChevronRight, CircleHelp, Code2, Download, Eraser, ExternalLink, FileCode2, FilePlus2,
+  AlertCircle, ArrowRight, Box, Boxes, Braces, Check, CheckCircle2, ChevronDown,
+  ChevronRight, Code2, Download, Eraser, ExternalLink, FileCode2, FilePlus2,
   FolderOpen, GitBranch, Hammer, HardDriveDownload, Image, Layers3, LoaderCircle, Package,
   Palette, Paintbrush, Play, Plus, Save, Search, Settings2, ShieldCheck, Sparkles, SquareTerminal,
   WandSparkles, X, Zap
